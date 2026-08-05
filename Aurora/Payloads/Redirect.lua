@@ -1,4 +1,4 @@
-local TARGET_URL = "https://gist.githubusercontent.com/MexrlDev/e8d1b2702c6a34d0cd737e0c025de3c2/raw/0c89512ab93d14300210f1910f34bfd83a94cf45/Xbox-Test.lua"
+local TARGET_URL = "https://raw.githubusercontent.com/MexrlDev/Xbox360/refs/heads/main/Aurora/Payloads/Secret.lua"
 
 function main()
     Script.SetStatus("Downloading target script...")
@@ -13,7 +13,7 @@ function main()
     Script.SetStatus("Running target script...")
 
     main = nil
-    local chunk, compileErr = load(http.OutputData, "Xbox-Test.lua")
+    local chunk, compileErr = load(http.OutputData, "Secret.lua")
     if not chunk then
         Script.ShowNotification("Invalid Lua script: " .. compileErr)
         return
