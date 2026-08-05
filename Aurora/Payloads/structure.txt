@@ -4,3 +4,4 @@ random-notify.lua
 Notify-Countdown.lua
 Sticky-Notify.lua
 lua-ver.lua
+LED-Ring-Color-Changer.lua
