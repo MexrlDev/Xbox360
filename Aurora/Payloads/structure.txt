@@ -7,3 +7,7 @@ API-Check.lua
 LED-Ring-Color-Changer.lua
 Open-Tray.lua
 Close-Tray.lua
+Toggle-Tray.lua
+Reboot-Console.lua
+ShutDown-Console.lua
+Restart-Aurora.lua
