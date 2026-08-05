@@ -3,7 +3,7 @@ scriptTitle       = "MexrlDev Payloads"
 scriptAuthor      = "MexrlDev"
 scriptVersion     = 5
 scriptDescription = "Browse and execute payloads from MexrlDev's GitHub repo"
-scriptPermissions = { "http", "filesystem", "content", "settings", "sql", "kernel" }
+scriptPermissions = { "http", "filesystem" }
 
 
 --  Configuration
