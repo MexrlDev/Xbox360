@@ -1,3 +1,4 @@
 function main()
-    Aurora.SetMessage("Lua version: " .. _VERSION, "bottom")
+    local version = _VERSION or "Lua 5.1 (Aurora)"
+    Aurora.SetMessage("Lua version: " .. tostring(version), "bottom")
 end
