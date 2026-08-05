@@ -1,21 +1,47 @@
 --  Script Metadata
 scriptTitle       = "MexrlDev Payloads"
 scriptAuthor      = "MexrlDev"
-scriptVersion     = 4
+scriptVersion     = 5
 scriptDescription = "Browse and execute payloads from MexrlDev's GitHub repo"
 scriptPermissions = { "http", "filesystem" }
 
 
---  Payload list module
-local listModule = require("list-structure")
-
--- How many payloads to show per page
+--  Configuration
+local BASE_RAW_URL = "https://raw.githubusercontent.com/MexrlDev/Xbox360/refs/heads/main/Aurora/Payloads/"
+local STRUCTURE_URL = BASE_RAW_URL .. "structure.txt"
 local ITEMS_PER_PAGE = 6
 
--- Global state
+--  Global state
 local payloads = {}
 local currentPage = 1
 local totalPages = 0
+
+
+--  Fetch payload list from GitHub
+function fetchPayloadList()
+    Script.SetStatus("Fetching payload list...")
+    Script.SetProgress(0)
+    local http = Http.Get(STRUCTURE_URL)
+    if not http.Success then
+        return nil, "Failed to download structure.txt"
+    end
+    Script.SetProgress(100)
+
+    local plist = {}
+    for line in http.OutputData:gmatch("[^\r\n]+") do
+        line = line:match("^%s*(.-)%s*$")
+        if line ~= "" then
+            table.insert(plist, line)
+        end
+    end
+
+    if #plist == 0 then
+        return nil, "No payloads found"
+    end
+
+    return plist
+end
+
 
 --  Helper: build the popup list for the current page
 function buildPageList()
@@ -23,7 +49,6 @@ function buildPageList()
     -- Refresh button always first
     table.insert(list, "[ ! ] Refresh List")
 
-    -- Calculate payload slice for this page
     local startIdx = (currentPage - 1) * ITEMS_PER_PAGE + 1
     local endIdx = math.min(startIdx + ITEMS_PER_PAGE - 1, #payloads)
 
@@ -32,7 +57,7 @@ function buildPageList()
         table.insert(list, name)
     end
 
-    -- Navigation items
+    -- Navigation items (wrap-around)
     if totalPages > 1 then
         table.insert(list, "← Previous")
         table.insert(list, "→ Next")
@@ -41,9 +66,10 @@ function buildPageList()
     return list, startIdx
 end
 
---  Execute a payload
+
+--  Execute a payload (download in memory, run)
 function downloadAndExecute(filename)
-    local url = listModule.getPayloadURL(filename)
+    local url = BASE_RAW_URL .. filename
 
     Script.SetStatus("Downloading " .. filename .. "...")
     Script.SetProgress(0)
@@ -82,6 +108,7 @@ function downloadAndExecute(filename)
     return true
 end
 
+
 --  Main entry point
 function main()
     if Aurora.HasInternetConnection() ~= true then
@@ -90,11 +117,15 @@ function main()
     end
 
     -- Initial fetch
-    local success, err = refreshPayloadList()
-    if not success then
+    local p, err = fetchPayloadList()
+    if not p then
         Script.ShowMessageBox("ERROR", err, "OK")
         return
     end
+
+    payloads = p
+    totalPages = math.ceil(#payloads / ITEMS_PER_PAGE)
+    currentPage = 1
 
     -- Main menu loop
     while true do
@@ -110,29 +141,30 @@ function main()
         -- 1) Refresh
         if idx == 1 then
             Script.ShowNotification("Refreshing payload list...")
-            local ok, errMsg = refreshPayloadList()
-            if not ok then
-                Script.ShowMessageBox("ERROR", errMsg, "OK")
+            local p2, err2 = fetchPayloadList()
+            if not p2 then
+                Script.ShowMessageBox("ERROR", err2, "OK")
                 break
             end
-            -- stay on page 1 after refresh
+            payloads = p2
+            totalPages = math.ceil(#payloads / ITEMS_PER_PAGE)
             currentPage = 1
+
         -- 2) Payload selection
-        elseif idx <= 1 + (math.min(ITEMS_PER_PAGE, #payloads - startIdx + 1)) then
+        elseif idx <= 1 + math.min(ITEMS_PER_PAGE, #payloads - startIdx + 1) then
             local payloadIndex = startIdx + idx - 2
             local filename = payloads[payloadIndex]
-            local ok = downloadAndExecute(filename)
-            if not ok then
-                Script.ShowMessageBox("ERROR", "Failed to execute " .. filename, "OK")
-            end
-        -- 3) Previous page
+            downloadAndExecute(filename)
+
+        -- 3) Previous page (wrap-around)
         elseif list[idx] == "← Previous" then
             if currentPage == 1 then
                 currentPage = totalPages
             else
                 currentPage = currentPage - 1
             end
-        -- 4) Next page
+
+        -- 4) Next page (wrap-around)
         elseif list[idx] == "→ Next" then
             if currentPage == totalPages then
                 currentPage = 1
@@ -141,16 +173,4 @@ function main()
             end
         end
     end
-end
-
---  Fetch / re‑fetch the payload list from GitHub
-function refreshPayloadList()
-    local p, err = listModule.fetchPayloadList()
-    if not p then
-        return false, err
-    end
-    payloads = p
-    totalPages = math.ceil(#payloads / ITEMS_PER_PAGE)
-    currentPage = 1
-    return true
 end
