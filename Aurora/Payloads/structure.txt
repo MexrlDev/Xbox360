@@ -9,5 +9,5 @@ Open-Tray.lua
 Close-Tray.lua
 Toggle-Tray.lua
 Reboot-Console.lua
-ShutDown-Console.lua
+Shutdown-Console.lua
 Restart-Aurora.lua
