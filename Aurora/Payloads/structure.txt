@@ -6,3 +6,4 @@ lua-ver.lua
 API-Check.lua
 LED-Ring-Color-Changer.lua
 Open-Tray.lua
+Close-Tray.lua
