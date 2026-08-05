@@ -1,18 +1,31 @@
--- Waits for new .lua files in RemotePayloads/ and executes them.
-
 local WATCH_DIR = "RemotePayloads\\"
 local BASE = Script.GetBasePath()
 local FULL_DIR = BASE .. WATCH_DIR
+local FTP_PORT = "21"   -- Aurora FTP default port
 
 function main()
+    -- Get Xbox IP
+    local ip = "unknown"
+    pcall(function()
+        ip = Aurora.GetIPAddress()
+    end)
+
+    -- Show listening info
+    Script.ShowMessageBox(
+        "Listener Active",
+        "FTP Payload Listener\n\nIP: " .. ip .. "\nPort: " .. FTP_PORT ..
+        "\n\nSend .lua files via FTP to:\n" .. FULL_DIR,
+        "OK"
+    )
+    Script.SetStatus("Listener running - " .. ip .. ":" .. FTP_PORT)
+
+    -- Create watch directory if missing
     if not FileSystem.FileExists(FULL_DIR) then
         FileSystem.CreateDirectory(FULL_DIR)
     end
-    Script.SetStatus("FTP watcher running")
-    Script.ShowNotification("FTP watcher started - listening for payloads")
 
     local known = {}
-    -- initial scan
+    -- initial scan to mark existing files as known
     local files = FileSystem.GetFiles(FULL_DIR)
     if files then
         for _, f in ipairs(files) do
@@ -25,11 +38,11 @@ function main()
         if files then
             for _, f in ipairs(files) do
                 if not known[f] and f:match("%.lua$") then
-                    Script.ShowNotification("New payload detected: " .. f)
+                    Script.ShowNotification("New payload: " .. f)
                     local path = FULL_DIR .. f
                     local content = FileSystem.ReadFile(path)
                     if content then
-                        main = nil
+                        main = nil  -- clear any previous main
                         local chunk, err = load(content, f)
                         if chunk then
                             local ok, runErr = pcall(chunk)
@@ -41,12 +54,12 @@ function main()
                             else
                                 Script.ShowNotification(f .. " executed")
                             end
-                            FileSystem.DeleteFile(path)  -- remove after execution
                         else
                             Script.ShowNotification("Invalid Lua: " .. err)
-                            FileSystem.DeleteFile(path)
                         end
                     end
+                    -- delete file after processing
+                    FileSystem.DeleteFile(path)
                 end
             end
             -- refresh known list
@@ -55,7 +68,7 @@ function main()
             end
         end
 
-        -- tiny delay to avoid hammering the disk
+        -- small delay to reduce CPU usage
         for _ = 1, 1000000 do end
     end
 end
