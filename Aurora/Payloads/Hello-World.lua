@@ -1,4 +1,1 @@
-function main()
-    Script.ShowNotification("Hello World!")
-    print("Notification sent.")
-end
+Script.ShowNotification("Hello World from GitHub!")
