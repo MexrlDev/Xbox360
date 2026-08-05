@@ -3,18 +3,12 @@ scriptTitle       = "MexrlDev Payloads"
 scriptAuthor      = "MexrlDev"
 scriptVersion     = 5
 scriptDescription = "Browse and execute payloads from MexrlDev's GitHub repo"
-scriptPermissions = { "http", "filesystem", "content", "kernel" }
+scriptPermissions = { "http", "filesystem", "content", "settings", "sql", "kernel" }
 
 
 --  Configuration
 local BASE_RAW_URL = "https://raw.githubusercontent.com/MexrlDev/Xbox360/refs/heads/main/Aurora/Payloads/"
 local STRUCTURE_URL = BASE_RAW_URL .. "structure.txt"
-local ITEMS_PER_PAGE = 6
-
---  Global state
-local payloads = {}
-local currentPage = 1
-local totalPages = 0
 
 
 --  Fetch payload list from GitHub
@@ -43,27 +37,18 @@ function fetchPayloadList()
 end
 
 
---  Helper: build the popup list for the current page
-function buildPageList()
+--  Build the full popup list (all payloads, no pages)
+function buildList()
     local list = {}
     -- Refresh button always first
     table.insert(list, "[ ! ] Refresh List")
 
-    local startIdx = (currentPage - 1) * ITEMS_PER_PAGE + 1
-    local endIdx = math.min(startIdx + ITEMS_PER_PAGE - 1, #payloads)
-
-    for i = startIdx, endIdx do
-        local name = payloads[i]:gsub("%.lua$", "")
+    for _, filename in ipairs(payloads) do
+        local name = filename:gsub("%.lua$", "")
         table.insert(list, name)
     end
 
-    -- Navigation items (wrap-around)
-    if totalPages > 1 then
-        table.insert(list, "← Previous")
-        table.insert(list, "→ Next")
-    end
-
-    return list, startIdx
+    return list
 end
 
 
@@ -124,12 +109,10 @@ function main()
     end
 
     payloads = p
-    totalPages = math.ceil(#payloads / ITEMS_PER_PAGE)
-    currentPage = 1
 
     -- Main menu loop
     while true do
-        local list, startIdx = buildPageList()
+        local list = buildList()
         local ret = Script.ShowPopupList("MexrlDev Payloads", "", list)
 
         if ret.Canceled then
@@ -138,7 +121,7 @@ function main()
 
         local idx = ret.Selected.Key
 
-        -- 1) Refresh
+        -- Refresh
         if idx == 1 then
             Script.ShowNotification("Refreshing payload list...")
             local p2, err2 = fetchPayloadList()
@@ -147,30 +130,9 @@ function main()
                 break
             end
             payloads = p2
-            totalPages = math.ceil(#payloads / ITEMS_PER_PAGE)
-            currentPage = 1
-
-        -- 2) Payload selection
-        elseif idx <= 1 + math.min(ITEMS_PER_PAGE, #payloads - startIdx + 1) then
-            local payloadIndex = startIdx + idx - 2
-            local filename = payloads[payloadIndex]
+        elseif idx >= 2 and idx <= #payloads + 1 then
+            local filename = payloads[idx - 1]
             downloadAndExecute(filename)
-
-        -- 3) Previous page (wrap-around)
-        elseif list[idx] == "← Previous" then
-            if currentPage == 1 then
-                currentPage = totalPages
-            else
-                currentPage = currentPage - 1
-            end
-
-        -- 4) Next page (wrap-around)
-        elseif list[idx] == "→ Next" then
-            if currentPage == totalPages then
-                currentPage = 1
-            else
-                currentPage = currentPage + 1
-            end
         end
     end
 end
