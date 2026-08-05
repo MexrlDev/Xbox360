@@ -1,1 +1,3 @@
-Script.ShowNotification("Lua version: " .. (_VERSION or "Lua 5.1 (Aurora)"))
+local v = _VERSION
+if not v then v = "Lua 5.2" end
+Script.ShowNotification("Lua version: " .. v)
