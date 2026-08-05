@@ -3,5 +3,5 @@ Type-a-Notify.lua
 random-notify.lua
 Sticky-Notify.lua
 lua-ver.lua
-Dump-API.lua
+API-Checker.lua
 LED-Ring-Color-Changer.lua
