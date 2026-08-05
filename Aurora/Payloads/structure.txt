@@ -2,12 +2,14 @@ Hello-World.lua
 Type-a-Notify.lua
 random-notify.lua
 Sticky-Notify.lua
+PopUp.lua
 lua-ver.lua
 API-Check.lua
 LED-Ring-Color-Changer.lua
 Open-Tray.lua
 Close-Tray.lua
 Toggle-Tray.lua
+Tray-Status.lua
 Reboot-Console.lua
 Shutdown-Console.lua
 Restart-Aurora.lua
