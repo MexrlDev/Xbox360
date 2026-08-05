@@ -394,18 +394,16 @@ GotoPrev
 
 ────────
 
-What your sample script uses
-
-Imported / required module
+## Imported / required module
 
 • require("MenuSystem") — this is a script-local module, not part of the public Aurora API list.
 
-Aurora APIs used in the script
+## Aurora APIs
 
 • Aurora.HasInternetConnection()
 • Aurora.Restart()
 
-Script APIs used in the script
+## Script APIs
 
 • Script.ShowMessageBox()
 • Script.ShowKeyboard()
@@ -416,7 +414,7 @@ Script APIs used in the script
 • Script.ShowNotification()
 • Script.SetRefreshListOnExit() is the documented form; the script you pasted calls Script.RefreshListOnExit(refreshRequired), which looks like an older alias or naming mismatch.
 
-FileSystem APIs used in the script
+## FileSystem APIs
 
 • FileSystem.DeleteDirectory()
 • FileSystem.FileExists()
@@ -424,11 +422,11 @@ FileSystem APIs used in the script
 • FileSystem.MoveDirectory()
 • FileSystem.DeleteFile()
 
-Http APIs used in the script
+## Http APIs
 
 • Http.Get()
 
-IniFile APIs used in the script
+## IniFile APIs
 
 • IniFile.LoadFile()
 • IniFile.LoadString()
@@ -436,12 +434,12 @@ IniFile APIs used in the script
 • :GetSection()
 • :ReadValue()
 
-ZipFile APIs used in the script
+## ZipFile APIs
 
 • ZipFile.OpenFile()
 • :Extract()
 
-Standard Lua used in the script
+## Standard Lua
 
 • print
 • pairs
@@ -455,7 +453,7 @@ Standard Lua used in the script
 
 ────────
 
-Notes
+## Notes
 
 • Public documentation says Aurora scripting is Lua 5.2 based.
 • The public API list above is the documented set from the Aurora Scripts repository.
