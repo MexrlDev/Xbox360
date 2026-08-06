@@ -15,3 +15,4 @@ Shutdown-Console.lua
 Restart-Aurora.lua
 Redirect.lua
 Listener.lua
+Show-Path.lua
